@@ -3,10 +3,13 @@ package api
 import (
 	"fmt"
 	"log/slog"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type APIConfig struct {
-	Port string
+	Cache *redis.Client
+	Port  string
 }
 
 func Run(cfg *APIConfig) {
