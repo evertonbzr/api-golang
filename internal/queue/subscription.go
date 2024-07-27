@@ -1,5 +1,3 @@
 package queue
 
-func LoadSubscription() {
-
-}
+func LoadSubscription() {}
