@@ -7,6 +7,7 @@ import (
 	"github.com/evertonbzr/api-golang/internal/api"
 	"github.com/evertonbzr/api-golang/internal/cache"
 	"github.com/evertonbzr/api-golang/internal/config"
+	"github.com/evertonbzr/api-golang/internal/queue"
 )
 
 func main() {
@@ -17,10 +18,18 @@ func main() {
 	cache := cache.InitRedis(config.REDIS_URL)
 	slog.Info("Connected to redis")
 
-	cfg := &api.APIConfig{
-		Cache: cache,
-		Port:  config.PORT,
+	queueConfig := &queue.QueueConfig{
+		URI: config.NATS_URI,
 	}
 
-	api.Run(cfg)
+	nc, js, _ := queue.Start(queueConfig)
+
+	apiCfg := &api.APIConfig{
+		Cache:          cache,
+		Port:           config.PORT,
+		NatsConnection: nc,
+		JetStream:      js,
+	}
+
+	api.Start(apiCfg)
 }

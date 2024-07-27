@@ -12,6 +12,7 @@ var (
 	ENV       string
 	NAME      string
 	REDIS_URL string
+	NATS_URI  string
 )
 
 func Load(env string) {
@@ -19,7 +20,7 @@ func Load(env string) {
 
 	if env == "" {
 		viper.Set("ENV", "development")
-		viper.Set("PORT", "8081")
+		viper.Set("PORT", "3000")
 		viper.Set("NAME", "api-golang")
 		viper.SetConfigFile(".env")
 
@@ -34,6 +35,7 @@ func Load(env string) {
 	ENV = viper.GetString("ENV")
 	NAME = viper.GetString("NAME")
 	REDIS_URL = viper.GetString("REDIS_URL")
+	NATS_URI = viper.GetString("NATS_URI")
 }
 
 func IsDevelopment() bool {
