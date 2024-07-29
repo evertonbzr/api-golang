@@ -11,6 +11,9 @@ clean:
 run:
 	@./bin/api;
 
+dev:
+	@go run cmd/api/main.go;
+
 db-status:
 	@GOOSE_DRIVER=postgres GOOSE_DBSTRING=$(dsn) goose --dir $(migrationPath) status;
 

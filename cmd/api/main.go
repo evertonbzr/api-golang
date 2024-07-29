@@ -19,7 +19,8 @@ func main() {
 	slog.Info("Connected to redis")
 
 	queueConfig := &queue.QueueConfig{
-		URI: config.NATS_URI,
+		URI:  config.NATS_URI,
+		Name: config.NAME,
 	}
 
 	nc, js, _ := queue.Start(queueConfig)

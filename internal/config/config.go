@@ -4,6 +4,7 @@ import (
 	"log"
 	"log/slog"
 
+	"github.com/nats-io/nats.go"
 	"github.com/spf13/viper"
 )
 
@@ -21,7 +22,7 @@ func Load(env string) {
 	if env == "" {
 		viper.Set("ENV", "development")
 		viper.Set("PORT", "3000")
-		viper.Set("NAME", "api-golang")
+		viper.Set("NAME", "module_todo")
 		viper.SetConfigFile(".env")
 
 		if err := viper.ReadInConfig(); err != nil {
@@ -35,7 +36,12 @@ func Load(env string) {
 	ENV = viper.GetString("ENV")
 	NAME = viper.GetString("NAME")
 	REDIS_URL = viper.GetString("REDIS_URL")
-	NATS_URI = viper.GetString("NATS_URI")
+
+	if viper.GetString("NATS_URL") != "" {
+		NATS_URI = nats.DefaultURL
+	} else {
+		NATS_URI = viper.GetString("NATS_URI")
+	}
 }
 
 func IsDevelopment() bool {

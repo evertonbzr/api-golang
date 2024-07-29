@@ -1,6 +1,8 @@
 package queue
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"log/slog"
 
@@ -14,7 +16,8 @@ var (
 )
 
 type QueueConfig struct {
-	URI string
+	URI  string
+	Name string
 }
 
 func connect(uri string) (*nats.Conn, jetstream.JetStream, error) {
@@ -42,7 +45,14 @@ func Start(cfg *QueueConfig) (*nats.Conn, jetstream.JetStream, error) {
 		log.Fatal("Error connecting to NATS", err)
 	}
 
+	ctx := context.Background()
+
 	slog.Info("Connected to NATS")
+
+	js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+		Name:     cfg.Name,
+		Subjects: []string{fmt.Sprintf("%s.*", cfg.Name)},
+	})
 
 	defer nc.Close()
 
