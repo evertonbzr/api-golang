@@ -15,6 +15,7 @@ var (
 	REDIS_URL    string
 	DATABASE_URL string
 	NATS_URI     string
+	JWT_SECRET   string
 )
 
 func Load(env string) {
@@ -38,6 +39,7 @@ func Load(env string) {
 	NAME = viper.GetString("NAME")
 	REDIS_URL = viper.GetString("REDIS_URL")
 	DATABASE_URL = viper.GetString("DATABASE_URL")
+	JWT_SECRET = viper.GetString("JWT_SECRET")
 
 	if viper.GetString("NATS_URL") != "" {
 		NATS_URI = nats.DefaultURL
