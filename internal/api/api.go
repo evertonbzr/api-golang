@@ -9,14 +9,17 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/evertonbzr/api-golang/internal/api/routes"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 type APIConfig struct {
+	DB             *gorm.DB
 	Cache          *redis.Client
 	Port           string
 	NatsConnection *nats.Conn
@@ -32,9 +35,9 @@ func Start(cfg *APIConfig) {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!"))
-	})
+	rb := routes.NewRoute(cfg.DB, cfg.Cache)
+
+	rb.SetRoutes(r)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,

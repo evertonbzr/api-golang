@@ -9,11 +9,12 @@ import (
 )
 
 var (
-	PORT      string
-	ENV       string
-	NAME      string
-	REDIS_URL string
-	NATS_URI  string
+	PORT         string
+	ENV          string
+	NAME         string
+	REDIS_URL    string
+	DATABASE_URL string
+	NATS_URI     string
 )
 
 func Load(env string) {
@@ -36,6 +37,7 @@ func Load(env string) {
 	ENV = viper.GetString("ENV")
 	NAME = viper.GetString("NAME")
 	REDIS_URL = viper.GetString("REDIS_URL")
+	DATABASE_URL = viper.GetString("DATABASE_URL")
 
 	if viper.GetString("NATS_URL") != "" {
 		NATS_URI = nats.DefaultURL

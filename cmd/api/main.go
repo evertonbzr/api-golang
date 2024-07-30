@@ -7,6 +7,7 @@ import (
 	"github.com/evertonbzr/api-golang/internal/api"
 	"github.com/evertonbzr/api-golang/internal/cache"
 	"github.com/evertonbzr/api-golang/internal/config"
+	"github.com/evertonbzr/api-golang/internal/database"
 	"github.com/evertonbzr/api-golang/internal/queue"
 )
 
@@ -17,6 +18,9 @@ func main() {
 
 	cache := cache.InitRedis(config.REDIS_URL)
 	slog.Info("Connected to redis")
+
+	db := database.InitDatabase(config.DATABASE_URL)
+	slog.Info("Connected to database")
 
 	queueConfig := &queue.QueueConfig{
 		URI:  config.NATS_URI,
@@ -30,6 +34,7 @@ func main() {
 		Port:           config.PORT,
 		NatsConnection: nc,
 		JetStream:      js,
+		DB:             db,
 	}
 
 	api.Start(apiCfg)
