@@ -20,3 +20,14 @@ func (s *UserService) GetUserById(id int) (user *model.User, err error) {
 	err = s.DB.First(user, id).Error
 	return user, err
 }
+
+func (s *UserService) GetUserByEmail(email string) (user *model.User, err error) {
+	user = &model.User{}
+	err = s.DB.Where("email = ?", email).First(user).Error
+	return user, err
+}
+
+func (s *UserService) CreateUser(user *model.User) (err error) {
+	err = s.DB.Create(user).Error
+	return err
+}

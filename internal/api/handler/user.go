@@ -20,6 +20,25 @@ func NewUserHandler(db *gorm.DB) *UserHandler {
 	}
 }
 
+func (h *UserHandler) GetMe() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// userId := r.Context().Value("userId").(int)
+
+		// user, err := h.Service.GetUserById(userId)
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusBadRequest)
+		// 	return
+		// }
+
+		// w.Header().Set("Content-Type", "application/json")
+		// w.WriteHeader(http.StatusOK)
+
+		// if err := json.NewEncoder(w).Encode(user); err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// }
+	}
+}
+
 func (h *UserHandler) GetUserById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idParam := chi.URLParam(r, "id")
