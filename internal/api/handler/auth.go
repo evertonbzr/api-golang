@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/evertonbzr/api-golang/internal/api/types"
-	"github.com/evertonbzr/api-golang/internal/api/utils"
 	"github.com/evertonbzr/api-golang/internal/model"
 	"github.com/evertonbzr/api-golang/internal/service"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"gorm.io/gorm"
 )
@@ -22,26 +21,22 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	}
 }
 
-func (h *AuthHandler) Login() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) Login() fiber.Handler {
+	return func(c *fiber.Ctx) error {
 		data := types.LoginRequest{}
 
-		if err := utils.DecodeJSONBody(w, r, &data); err != nil {
-			utils.RespondWithJSON(w, http.StatusBadRequest, nil)
-			return
+		if err := c.BodyParser(&data); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(nil)
 		}
 
 		user, err := h.Service.GetUserByEmail(data.Email)
 
 		if err != nil {
-			utils.RespondWithJSON(w, http.StatusBadRequest, nil)
-			return
+			return c.Status(fiber.StatusBadRequest).JSON(nil)
 		}
 
 		if user.Password != data.Password {
-			utils.RespondWithJSON(w, http.StatusUnauthorized,
-				map[string]string{"error": "invalid credentials"})
-			return
+			return c.Status(fiber.StatusUnauthorized).JSON(map[string]string{"error": "invalid credentials"})
 		}
 
 		token, _ := service.NewAccessToken(service.UserClaims{
@@ -52,25 +47,22 @@ func (h *AuthHandler) Login() http.HandlerFunc {
 			},
 		})
 
-		utils.RespondWithJSON(w, http.StatusOK, map[string]string{"token": token})
+		return c.Status(fiber.StatusOK).JSON(map[string]string{"token": token})
 	}
 }
 
-func (h *AuthHandler) Register() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) Register() fiber.Handler {
+	return func(c *fiber.Ctx) error {
 		data := types.RegisterRequest{}
 
-		if err := utils.DecodeJSONBody(w, r, &data); err != nil {
-			utils.RespondWithJSON(w, http.StatusBadRequest, nil)
-			return
+		if err := c.BodyParser(&data); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(nil)
 		}
 
 		user, _ := h.Service.GetUserByEmail(data.Email)
 
 		if user.ID != 0 {
-			utils.RespondWithJSON(w, http.StatusConflict,
-				map[string]string{"error": "user already exists"})
-			return
+			return c.Status(fiber.StatusConflict).JSON(map[string]string{"error": "user already exists"})
 		}
 
 		user = &model.User{
@@ -80,10 +72,9 @@ func (h *AuthHandler) Register() http.HandlerFunc {
 		}
 
 		if err := h.Service.CreateUser(user); err != nil {
-			utils.RespondWithJSON(w, http.StatusInternalServerError, nil)
-			return
+			return c.Status(fiber.StatusInternalServerError).JSON(nil)
 		}
 
-		utils.RespondWithJSON(w, http.StatusCreated, nil)
+		return c.Status(fiber.StatusCreated).JSON(nil)
 	}
 }
