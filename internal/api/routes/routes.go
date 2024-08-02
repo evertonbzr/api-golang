@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/evertonbzr/api-golang/internal/api/handler"
+	"github.com/evertonbzr/api-golang/internal/api/middlewares"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -21,25 +22,17 @@ func NewRoute(db *gorm.DB, cache *redis.Client) *RouteConfig {
 
 func (r *RouteConfig) SetRoutesFiber(app *fiber.App) {
 	authHandler := handler.NewAuthHandler(r.DB)
+	userHandler := handler.NewUserHandler(r.DB)
+
+	app.Use(middlewares.DecodeJwtMw())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
+
 	app.Post("/login", authHandler.Login())
+	app.Post("/register", authHandler.Register())
+	app.Get("/me", userHandler.GetMe())
+
+	app.Get("/users", userHandler.List())
 }
-
-// func (r *RouteConfig) SetRoutes(router *chi.Mux) {
-// 	authHandler := handler.NewAuthHandler(r.DB)
-// 	userHandler := handler.NewUserHandler(r.DB)
-
-// 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-// 		w.Write([]byte("Hello World!"))
-// 	})
-
-// 	router.Post("/login", authHandler.Login())
-// 	router.Post("/register", authHandler.Register())
-
-// 	router.Route("/users", func(r chi.Router) {
-// 		r.Get("/{id}", userHandler.GetUserById())
-// 	})
-// }

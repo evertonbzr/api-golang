@@ -1,12 +1,8 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
-	"strconv"
-
 	"github.com/evertonbzr/api-golang/internal/service"
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -20,45 +16,28 @@ func NewUserHandler(db *gorm.DB) *UserHandler {
 	}
 }
 
-func (h *UserHandler) GetMe() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// userId := r.Context().Value("userId").(int)
+func (h *UserHandler) GetMe() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		userId := c.Locals("userId").(int)
 
-		// user, err := h.Service.GetUserById(userId)
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusBadRequest)
-		// 	return
-		// }
-
-		// w.Header().Set("Content-Type", "application/json")
-		// w.WriteHeader(http.StatusOK)
-
-		// if err := json.NewEncoder(w).Encode(user); err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// }
+		return c.JSON(fiber.Map{
+			"userId": userId,
+		})
 	}
 }
 
-func (h *UserHandler) GetUserById() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		idParam := chi.URLParam(r, "id")
-		id, err := strconv.Atoi(idParam)
+func (h *UserHandler) List() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		users, err := h.Service.ListUsers()
+
 		if err != nil {
-			http.Error(w, "Invalid user ID", http.StatusBadRequest)
-			return
+			return c.Status(500).JSON(fiber.Map{
+				"error": err.Error(),
+			})
 		}
 
-		user, err := h.Service.GetUserById(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		if err := json.NewEncoder(w).Encode(user); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		return c.JSON(fiber.Map{
+			"users": users,
+		})
 	}
 }

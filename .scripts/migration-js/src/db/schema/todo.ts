@@ -4,7 +4,7 @@ import { users } from "./users";
 
 export const todos = pgTable("todos", {
   id: serial("id").primaryKey(),
-  title: varchar("full_name", { length: 255 }),
+  title: varchar("title", { length: 255 }),
   description: text("description"),
   status: varchar("status", { length: 100 }),
   userId: serial("user_id").references(() => users.id, {

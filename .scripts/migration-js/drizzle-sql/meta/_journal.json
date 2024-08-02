@@ -15,6 +15,13 @@
       "when": 1722323798985,
       "tag": "0001_sloppy_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1722603531988,
+      "tag": "0002_careful_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }

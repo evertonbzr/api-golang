@@ -31,3 +31,8 @@ func (s *UserService) CreateUser(user *model.User) (err error) {
 	err = s.DB.Create(user).Error
 	return err
 }
+
+func (s *UserService) ListUsers() (users []*model.User, err error) {
+	err = s.DB.Preload("Todos").Find(&users).Error
+	return users, err
+}
