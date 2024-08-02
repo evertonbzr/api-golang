@@ -1,15 +1,20 @@
 package service
 
 import (
-	"github.com/redis/go-redis/v9"
+	"github.com/evertonbzr/api-golang/internal/model"
 	"gorm.io/gorm"
 )
 
 type TodoService struct {
-	DB    *gorm.DB
-	Cache *redis.Client
+	DB *gorm.DB
 }
 
-func NewTodoService() *TodoService {
-	return &TodoService{}
+func NewTodoService(db *gorm.DB) *TodoService {
+	return &TodoService{
+		DB: db,
+	}
+}
+
+func (s *TodoService) Create(todo []model.Todo) error {
+	return s.DB.Create(&todo).Error
 }

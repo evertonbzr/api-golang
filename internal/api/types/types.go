@@ -10,3 +10,9 @@ type RegisterRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type CreateTodoRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+}
