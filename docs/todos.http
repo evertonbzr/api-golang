@@ -1,0 +1,14 @@
+# List of all todos
+POST http://localhost:3000/todo
+{
+  title: "Buy Milk",
+  description: "Buy Milk from the store"
+  status: "incomplete"
+}
+# Create a new todo
+POST http://localhost:3000/todo
+{
+  title: "Buy Milk",
+  description: "Buy Milk from the store"
+  status: "incomplete"
+}

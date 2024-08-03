@@ -11,7 +11,7 @@ type RegisterRequest struct {
 	Password string `json:"password"`
 }
 
-type CreateTodoRequest struct {
+type CreateOrUpdateTodoRequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Status      string `json:"status"`

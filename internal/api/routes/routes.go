@@ -23,7 +23,7 @@ func NewRoute(db *gorm.DB, cache *redis.Client) *RouteConfig {
 func (r *RouteConfig) SetRoutesFiber(app *fiber.App) {
 	authHandler := handler.NewAuthHandler(r.DB)
 	userHandler := handler.NewUserHandler(r.DB)
-	todoHanlder := handler.NewTodoHandler(r.DB)
+	todoHandler := handler.NewTodoHandler(r.DB)
 
 	app.Use(middlewares.DecodeJwtMw())
 
@@ -38,6 +38,9 @@ func (r *RouteConfig) SetRoutesFiber(app *fiber.App) {
 	app.Get("/users", userHandler.List())
 
 	app.Route("/todo", func(api fiber.Router) {
-		api.Post("/", todoHanlder.Create()).Name("create")
+		api.Post("/", todoHandler.Create()).Name("create")
+		api.Get("/", todoHandler.List()).Name("list")
+		api.Put("/:id", todoHandler.Update()).Name("update.put")
+		api.Patch("/:id", todoHandler.Update()).Name("update.patch")
 	}, "todo.")
 }
