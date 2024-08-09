@@ -5,18 +5,17 @@ import (
 
 	"github.com/evertonbzr/api-golang/internal/api/types"
 	"github.com/evertonbzr/api-golang/internal/model"
-	"github.com/evertonbzr/api-golang/internal/service"
+	"github.com/evertonbzr/api-golang/internal/repository"
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 type BookHandler struct {
-	Service *service.BookService
+	BookRepo *repository.BookRepository
 }
 
-func NewBookHandler(db *gorm.DB) *BookHandler {
+func NewBookHandler() *BookHandler {
 	return &BookHandler{
-		Service: service.NewBookService(db),
+		BookRepo: repository.NewBookRepository(),
 	}
 }
 
@@ -35,7 +34,7 @@ func (h *BookHandler) Create() fiber.Handler {
 			Author:      data.Author,
 		}
 
-		if err := h.Service.Create(
+		if err := h.BookRepo.Create(
 			[]model.Book{book},
 		); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(nil)
@@ -50,7 +49,7 @@ func (h *BookHandler) Create() fiber.Handler {
 
 func (h *BookHandler) List() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		books, err := h.Service.List()
+		books, err := h.BookRepo.List()
 
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(nil)
@@ -82,7 +81,7 @@ func (h *BookHandler) Update() fiber.Handler {
 		}
 		id := uint(id64)
 
-		book, err := h.Service.GetByID(id)
+		book, err := h.BookRepo.GetByID(id)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": "book not found",
@@ -102,7 +101,7 @@ func (h *BookHandler) Update() fiber.Handler {
 			book.Author = data.Author
 		}
 
-		if err := h.Service.Update(book); err != nil {
+		if err := h.BookRepo.Update(book); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": "Failed to update",
 			})

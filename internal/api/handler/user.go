@@ -1,18 +1,17 @@
 package handler
 
 import (
-	"github.com/evertonbzr/api-golang/internal/service"
+	"github.com/evertonbzr/api-golang/internal/repository"
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 type UserHandler struct {
-	Service *service.UserService
+	UserRepo *repository.UserRepository
 }
 
-func NewUserHandler(db *gorm.DB) *UserHandler {
+func NewUserHandler() *UserHandler {
 	return &UserHandler{
-		Service: service.NewUserService(db),
+		UserRepo: repository.NewUserRepository(),
 	}
 }
 
@@ -28,7 +27,7 @@ func (h *UserHandler) GetMe() fiber.Handler {
 
 func (h *UserHandler) List() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		users, err := h.Service.ListUsers()
+		users, err := h.UserRepo.ListNotAdminUsers()
 
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{

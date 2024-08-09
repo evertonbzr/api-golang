@@ -1,14 +1,13 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
 	"github.com/evertonbzr/api-golang/internal/api"
-	"github.com/evertonbzr/api-golang/internal/cache"
 	"github.com/evertonbzr/api-golang/internal/config"
-	"github.com/evertonbzr/api-golang/internal/database"
-	"github.com/evertonbzr/api-golang/internal/queue"
+	"github.com/evertonbzr/api-golang/pkg/infra"
 )
 
 func main() {
@@ -16,25 +15,20 @@ func main() {
 
 	slog.Info("Starting API...", "port", config.PORT, "env", config.ENV)
 
-	cache := cache.InitRedis(config.REDIS_URL)
-	slog.Info("Connected to redis")
+	ctx := context.Background()
 
-	db := database.InitDatabase(config.DATABASE_URL)
-	slog.Info("Connected to database")
+	infra.SetupDependecies(ctx, config.REDIS_URL, config.DATABASE_URL)
+	// slog.Info("Connected to database")
 
-	queueConfig := &queue.QueueConfig{
-		URI:  config.NATS_URI,
-		Name: config.NAME,
-	}
+	// queueConfig := &queue.QueueConfig{
+	// 	URI:  config.NATS_URI,
+	// 	Name: config.NAME,
+	// }
 
-	nc, js, _ := queue.Start(queueConfig)
+	// nc, js, _ := queue.Start(queueConfig)
 
 	apiCfg := &api.APIConfig{
-		Cache:          cache,
-		Port:           config.PORT,
-		NatsConnection: nc,
-		JetStream:      js,
-		DB:             db,
+		Port: config.PORT,
 	}
 
 	api.Start(apiCfg)

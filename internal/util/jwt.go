@@ -1,16 +1,17 @@
-package service
+package util
 
 import (
 	"errors"
 	"time"
 
 	"github.com/evertonbzr/api-golang/internal/config"
+	"github.com/evertonbzr/api-golang/internal/model"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type ModuleClaims struct {
 	jwt.RegisteredClaims
-	Id uint `json:"id"`
+	User model.User `json:"user"`
 }
 
 func HasJwtExpired(token *jwt.Token) error {
@@ -20,7 +21,7 @@ func HasJwtExpired(token *jwt.Token) error {
 	}
 
 	if exp == nil || exp.Before(time.Now()) {
-		return errors.New("Token has expired")
+		return errors.New("TokenHasExpired")
 	}
 
 	return nil
@@ -38,7 +39,7 @@ func DecodeJWT(tokenString string) (*jwt.Token, *ModuleClaims, error) {
 	claims := &ModuleClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("Unexpected signing method")
+			return nil, errors.New("UnexpectedSigningMethod")
 		}
 
 		return []byte(config.JWT_SECRET), nil
@@ -54,12 +55,8 @@ func DecodeJWT(tokenString string) (*jwt.Token, *ModuleClaims, error) {
 	return token, claims, nil
 }
 
-func GenerateJwt(id uint) (string, error) {
+func GenerateJwt(user *model.User) (string, error) {
 	expTime := time.Now().Add(8760 * time.Hour)
-
-	if id == 0 {
-		return "", errors.New("Invalid user id")
-	}
 
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
@@ -67,7 +64,7 @@ func GenerateJwt(id uint) (string, error) {
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(expTime),
 			},
-			Id: id,
+			User: *user,
 		})
 
 	tokenString, err := token.SignedString([]byte(config.JWT_SECRET))

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/evertonbzr/api-golang/internal/api/routes"
+	"github.com/evertonbzr/api-golang/pkg/infra"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
@@ -18,19 +19,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
-	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
-	"github.com/redis/go-redis/v9"
 	"github.com/valyala/fasthttp"
-	"gorm.io/gorm"
 )
 
 type APIConfig struct {
-	DB             *gorm.DB
-	Cache          *redis.Client
-	Port           string
-	NatsConnection *nats.Conn
-	JetStream      jetstream.JetStream
+	Port string
 }
 
 func Start(cfg *APIConfig) {
@@ -46,7 +39,7 @@ func Start(cfg *APIConfig) {
 		return c.SendString("I'm a GET request!")
 	})
 
-	rb := routes.NewRoute(cfg.DB, cfg.Cache)
+	rb := routes.NewRoute()
 	rb.SetRoutesFiber(app)
 
 	srv := &fasthttp.Server{
@@ -73,8 +66,10 @@ func Start(cfg *APIConfig) {
 
 	select {
 	case <-ctx.Done():
+		infra.CleanUpDependecies()
 		log.Println("timeout of 5 seconds.")
 	default:
+		infra.CleanUpDependecies()
 		log.Println("Server exiting")
 	}
 }

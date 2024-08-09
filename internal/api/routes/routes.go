@@ -2,30 +2,22 @@ package routes
 
 import (
 	"github.com/evertonbzr/api-golang/internal/api/handler"
-	"github.com/evertonbzr/api-golang/internal/api/middlewares"
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 type RouteConfig struct {
-	DB    *gorm.DB
-	Cache *redis.Client
 }
 
-func NewRoute(db *gorm.DB, cache *redis.Client) *RouteConfig {
-	return &RouteConfig{
-		DB:    db,
-		Cache: cache,
-	}
+func NewRoute() *RouteConfig {
+	return &RouteConfig{}
 }
 
 func (r *RouteConfig) SetRoutesFiber(app *fiber.App) {
-	authHandler := handler.NewAuthHandler(r.DB)
-	userHandler := handler.NewUserHandler(r.DB)
-	bookHandler := handler.NewBookHandler(r.DB)
+	authHandler := handler.NewAuthHandler()
+	userHandler := handler.NewUserHandler()
+	bookHandler := handler.NewBookHandler()
 
-	app.Use(middlewares.DecodeJwtMw())
+	// app.Use(middlewares.DecodeJwtMw())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
