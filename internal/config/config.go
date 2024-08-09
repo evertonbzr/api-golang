@@ -41,9 +41,9 @@ func Load(env string) {
 	DATABASE_URL = viper.GetString("DATABASE_URL")
 	JWT_SECRET = viper.GetString("JWT_SECRET")
 
-	if viper.GetString("NATS_URL") != "" {
-		NATS_URI = nats.DefaultURL
-	} else {
+	NATS_URI = nats.DefaultURL
+
+	if viper.GetString("NATS_URI") != "" {
 		NATS_URI = viper.GetString("NATS_URI")
 	}
 }

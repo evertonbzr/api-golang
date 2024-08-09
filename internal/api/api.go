@@ -34,11 +34,6 @@ type APIConfig struct {
 
 func Start(cfg *APIConfig) {
 	app := fiber.New()
-	// r := chi.NewRouter()
-
-	// app.Get("/", func(c *fiber.Ctx) error {
-	// 	return c.SendString("Hello, World!")
-	// })
 
 	app.Use(logger.New())
 	app.Use(requestid.New())
