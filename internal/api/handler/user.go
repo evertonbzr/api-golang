@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/evertonbzr/api-golang/internal/repository"
+	"github.com/evertonbzr/api-golang/internal/util"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,10 +18,16 @@ func NewUserHandler() *UserHandler {
 
 func (h *UserHandler) GetMe() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		userId := c.Locals("userId").(int)
+		claims, ok := c.Locals("userClaims").(*util.ModuleClaims)
+
+		if !ok {
+			return c.Status(500).JSON(fiber.Map{
+				"error": "UserClaimsNotFound",
+			})
+		}
 
 		return c.JSON(fiber.Map{
-			"userId": userId,
+			"user": claims.User,
 		})
 	}
 }

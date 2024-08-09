@@ -14,16 +14,17 @@ import (
 var client *redis.Client
 
 func InitRedisClient(uri string) *redis.Client {
+	url, err := redis.ParseURL(uri)
+	if err != nil {
+		log.Fatal("redis", err.Error())
+	}
+
 	if client != nil {
 		slog.Warn("Redis client already initialized, returning the same instance")
 		return client
 	}
 
-	client = redis.NewClient(&redis.Options{
-		Addr:     uri,
-		Password: "",
-		DB:       0,
-	})
+	client = redis.NewClient(url)
 
 	return client
 }
