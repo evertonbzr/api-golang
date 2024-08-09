@@ -15,6 +15,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
 	"github.com/nats-io/nats.go"
@@ -39,6 +40,7 @@ func Start(cfg *APIConfig) {
 	app.Use(requestid.New())
 	app.Use(healthcheck.New())
 	app.Use(helmet.New())
+	app.Use(recover.New())
 
 	app.Get("/api/list", func(c *fiber.Ctx) error {
 		return c.SendString("I'm a GET request!")

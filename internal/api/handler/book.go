@@ -10,69 +10,71 @@ import (
 	"gorm.io/gorm"
 )
 
-type TodoHandler struct {
-	Service *service.TodoService
+type BookHandler struct {
+	Service *service.BookService
 }
 
-func NewTodoHandler(db *gorm.DB) *TodoHandler {
-	return &TodoHandler{
-		Service: service.NewTodoService(db),
+func NewBookHandler(db *gorm.DB) *BookHandler {
+	return &BookHandler{
+		Service: service.NewBookService(db),
 	}
 }
 
-func (h *TodoHandler) Create() fiber.Handler {
+func (h *BookHandler) Create() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		data := types.CreateOrUpdateTodoRequest{}
+		data := types.CreateOrUpdateBookRequest{}
 
 		if err := c.BodyParser(&data); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(nil)
 		}
 
-		todo := model.Todo{
+		book := model.Book{
 			Title:       data.Title,
 			Description: data.Description,
 			Status:      data.Status,
-			UserID:      1,
+			Author:      data.Author,
 		}
 
 		if err := h.Service.Create(
-			[]model.Todo{todo},
+			[]model.Book{book},
 		); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(nil)
 		}
 
 		return c.JSON(fiber.Map{
-			"message": "Create",
+			"message": "Create book successfully",
+			"book":    book,
 		})
 	}
 }
 
-func (h *TodoHandler) List() fiber.Handler {
+func (h *BookHandler) List() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		todos, err := h.Service.List()
+		books, err := h.Service.List()
 
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(nil)
 		}
 
 		return c.JSON(fiber.Map{
-			"todos": todos,
+			"books": books,
 		})
 	}
 }
 
-func (h *TodoHandler) Update() fiber.Handler {
+func (h *BookHandler) Update() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		todoId := c.Params("id")
+		bookId := c.Params("id")
 
-		var data types.CreateOrUpdateTodoRequest
+		var data types.CreateOrUpdateBookRequest
+
 		if err := c.BodyParser(&data); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": "Invalid request body",
 			})
 		}
 
-		id64, err := strconv.Atoi(todoId)
+		id64, err := strconv.Atoi(bookId)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": "Invalid ID",
@@ -80,32 +82,35 @@ func (h *TodoHandler) Update() fiber.Handler {
 		}
 		id := uint(id64)
 
-		todo, err := h.Service.GetByID(id)
+		book, err := h.Service.GetByID(id)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": "Todo not found",
+				"message": "book not found",
 			})
 		}
 
 		if data.Title != "" {
-			todo.Title = data.Title
+			book.Title = data.Title
 		}
 		if data.Description != "" {
-			todo.Description = data.Description
+			book.Description = data.Description
 		}
 		if data.Status != "" {
-			todo.Status = data.Status
+			book.Status = data.Status
+		}
+		if data.Author != "" {
+			book.Author = data.Author
 		}
 
-		if err := h.Service.Update(todo); err != nil {
+		if err := h.Service.Update(book); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": "Failed to update",
 			})
 		}
 
 		return c.JSON(fiber.Map{
-			"message": "Todo updated successfully",
-			"todo":    todo,
+			"message": "book updated successfully",
+			"book":    book,
 		})
 	}
 }

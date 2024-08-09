@@ -1,0 +1,34 @@
+services:
+  database:
+    container_name: database
+    image: postgres:12
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+  cache:
+    container_name: cache
+    image: redis:6
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+  nats:
+    container_name: natsc
+    deploy:
+      resources:
+        limits:
+          memory: 300m
+    command: ["nats-server", "-js"]
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+    networks:
+      - mynetwork
+networks:
+  mynetwork:
+    driver: bridge

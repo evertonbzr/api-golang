@@ -1,39 +1,80 @@
 package service
 
 import (
+	"errors"
+	"time"
+
 	"github.com/evertonbzr/api-golang/internal/config"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-type UserClaims struct {
+type ModuleClaims struct {
+	jwt.RegisteredClaims
 	Id uint `json:"id"`
-	jwt.StandardClaims
 }
 
-func NewAccessToken(claims UserClaims) (string, error) {
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+func HasJwtExpired(token *jwt.Token) error {
+	exp, err := token.Claims.GetExpirationTime()
+	if err != nil {
+		return err
+	}
 
-	return accessToken.SignedString([]byte(config.JWT_SECRET))
+	if exp == nil || exp.Before(time.Now()) {
+		return errors.New("Token has expired")
+	}
+
+	return nil
 }
 
-func NewRefreshToken(claims jwt.StandardClaims) (string, error) {
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	return refreshToken.SignedString([]byte(config.JWT_SECRET))
+func GetDurationFromJWT(token *jwt.Token) (time.Duration, error) {
+	exp, err := token.Claims.GetExpirationTime()
+	if err != nil {
+		return 0, err
+	}
+	return time.Since(exp.Time).Abs(), nil
 }
 
-func ParseAccessToken(accessToken string) *UserClaims {
-	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+func DecodeJWT(tokenString string) (*jwt.Token, *ModuleClaims, error) {
+	claims := &ModuleClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Unexpected signing method")
+		}
+
 		return []byte(config.JWT_SECRET), nil
 	})
+	if err != nil {
+		return nil, nil, err
+	}
 
-	return parsedAccessToken.Claims.(*UserClaims)
+	if err = HasJwtExpired(token); err != nil {
+		return nil, nil, err
+	}
+
+	return token, claims, nil
 }
 
-func ParseRefreshToken(refreshToken string) *jwt.StandardClaims {
-	parsedRefreshToken, _ := jwt.ParseWithClaims(refreshToken, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.JWT_SECRET), nil
-	})
+func GenerateJwt(id uint) (string, error) {
+	expTime := time.Now().Add(8760 * time.Hour)
 
-	return parsedRefreshToken.Claims.(*jwt.StandardClaims)
+	if id == 0 {
+		return "", errors.New("Invalid user id")
+	}
+
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		ModuleClaims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(expTime),
+			},
+			Id: id,
+		})
+
+	tokenString, err := token.SignedString([]byte(config.JWT_SECRET))
+
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }

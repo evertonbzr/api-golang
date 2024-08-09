@@ -16,7 +16,7 @@ func main() {
 	db := database.InitDatabase(config.DATABASE_URL)
 	slog.Info("Connected to database")
 
-	err := db.AutoMigrate(&model.User{}, &model.Todo{})
+	err := db.AutoMigrate(&model.User{}, &model.Book{}, &model.Borrowing{})
 
 	if err != nil {
 		log.Fatal("Error migrating database", "error", err)

@@ -1,13 +1,10 @@
 package handler
 
 import (
-	"time"
-
 	"github.com/evertonbzr/api-golang/internal/api/types"
 	"github.com/evertonbzr/api-golang/internal/model"
 	"github.com/evertonbzr/api-golang/internal/service"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt"
 	"gorm.io/gorm"
 )
 
@@ -39,13 +36,7 @@ func (h *AuthHandler) Login() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(map[string]string{"error": "invalid credentials"})
 		}
 
-		token, _ := service.NewAccessToken(service.UserClaims{
-			Id: user.ID,
-			StandardClaims: jwt.StandardClaims{
-				IssuedAt:  time.Now().Unix(),
-				ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-			},
-		})
+		token, _ := service.GenerateJwt(user.ID)
 
 		return c.Status(fiber.StatusOK).JSON(map[string]string{"token": token})
 	}
