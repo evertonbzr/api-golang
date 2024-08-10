@@ -24,7 +24,7 @@ func Load(env string) {
 	if env == "" {
 		viper.Set("ENV", "development")
 		viper.Set("PORT", "3000")
-		viper.Set("NAME", "module_todo")
+		viper.Set("NAME", "module_library")
 		viper.SetConfigFile(".env")
 
 		if err := viper.ReadInConfig(); err != nil {

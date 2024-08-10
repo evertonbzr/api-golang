@@ -25,13 +25,13 @@ func (r *RouteConfig) SetRoutesFiber(app *fiber.App) {
 	app.Post("/login", authHandler.Login())
 	app.Post("/register", authHandler.Register())
 
-	// app.Use(middlewares.AuthJwtMw("ad"))
 	app.Get("/me", middlewares.AuthJwtMw("admin"), userHandler.GetMe())
 	app.Get("/users", middlewares.AuthJwtMw("admin"), userHandler.List())
 
 	app.Route("/books", func(api fiber.Router) {
+		api.Get("/", middlewares.AuthJwtMw(), bookHandler.List()).Name("list")
+		api.Use(middlewares.AuthJwtMw("admin"))
 		api.Post("/", bookHandler.Create()).Name("create")
-		api.Get("/", bookHandler.List()).Name("list")
 		api.Put("/:id", bookHandler.Update()).Name("update.put")
 		api.Patch("/:id", bookHandler.Update()).Name("update.patch")
 	}, "todo.")

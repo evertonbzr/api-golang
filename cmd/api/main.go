@@ -17,15 +17,12 @@ func main() {
 
 	ctx := context.Background()
 
-	infra.SetupDependecies(ctx, config.REDIS_URL, config.DATABASE_URL)
-	// slog.Info("Connected to database")
-
-	// queueConfig := &queue.QueueConfig{
-	// 	URI:  config.NATS_URI,
-	// 	Name: config.NAME,
-	// }
-
-	// nc, js, _ := queue.Start(queueConfig)
+	infra.SetupDependecies(ctx, &infra.InfraConfig{
+		RedisURI:    config.REDIS_URL,
+		PostgresURI: config.DATABASE_URL,
+		NatsURI:     config.NATS_URI,
+		NatsName:    config.NAME,
+	})
 
 	apiCfg := &api.APIConfig{
 		Port: config.PORT,
