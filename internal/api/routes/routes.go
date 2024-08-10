@@ -34,11 +34,12 @@ func (r *RouteConfig) SetRoutesFiber(app *fiber.App) {
 		api.Post("/", bookHandler.Create()).Name("create")
 		api.Put("/:id", bookHandler.Update()).Name("update.put")
 		api.Patch("/:id", bookHandler.Update()).Name("update.patch")
-	}, "todo.")
+	}, "book.")
 
 	app.Route("/borrowings", func(api fiber.Router) {
 		api.Use(middlewares.AuthJwtMw("admin"))
-		api.Get("/", handler.NewBorrowingHandler().List())
+		api.Get("/", handler.NewBorrowingHandler().ListPending())
 		api.Post("/", handler.NewBorrowingHandler().Create())
-	})
+		api.Put("/", handler.NewBorrowingHandler().Update())
+	}, "borrowing.")
 }

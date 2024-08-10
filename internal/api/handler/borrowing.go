@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"time"
+
 	"github.com/evertonbzr/api-golang/internal/api/types"
 	"github.com/evertonbzr/api-golang/internal/model"
 	"github.com/evertonbzr/api-golang/internal/repository"
@@ -67,6 +69,7 @@ func (h *BorrowingHandler) Create() fiber.Handler {
 		}
 
 		borrowing.UserID = data.UserID
+		borrowing.Status = "borrowed"
 
 		if err := h.BorrowingRepo.Create(&borrowing); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -85,6 +88,62 @@ func (h *BorrowingHandler) Create() fiber.Handler {
 
 		return c.JSON(fiber.Map{
 			"message":   "Borrowing created successfully",
+			"borrowing": borrowing,
+		})
+	}
+}
+
+func (h *BorrowingHandler) Update() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var data types.UpdateBorrowingRequest
+
+		if err := c.BodyParser(&data); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid body",
+			})
+		}
+
+		if data.BorrowingID == 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "id is required",
+			})
+		}
+
+		var borrowing model.Borrowing
+
+		borrowing.ID = data.BorrowingID
+
+		if data.Status != "" {
+			if data.Status != "returned" && data.Status != "borrowed" {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": "Invalid status",
+				})
+			}
+		} else {
+			data.Status = "returned"
+		}
+
+		borrowing.Status = data.Status
+		returnedAt := time.Now()
+		borrowing.ReturnedAt = &returnedAt
+
+		if err := h.BorrowingRepo.Update(&borrowing); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Failed to update borrowing",
+			})
+		}
+
+		// if err := h.BookRepo.Update(model.Book{
+		// 	ID:     book.ID,
+		// 	Status: "borrowed",
+		// }); err != nil {
+		// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		// 		"message": "Failed to update book",
+		// 	})
+		// }
+
+		return c.JSON(fiber.Map{
+			"message":   "Borrowing updated successfully",
 			"borrowing": borrowing,
 		})
 	}

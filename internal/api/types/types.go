@@ -28,3 +28,8 @@ type CreateBorrowingRequest struct {
 	UserID uint `json:"user_id"`
 	BookID uint `json:"book_id"`
 }
+
+type UpdateBorrowingRequest struct {
+	BorrowingID uint   `json:"id"`
+	Status      string `json:"status"`
+}

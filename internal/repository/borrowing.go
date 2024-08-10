@@ -28,7 +28,7 @@ func (s *BorrowingRepository) GetByID(id uint) (model.Borrowing, error) {
 	return borrowing, nil
 }
 
-func (s *BorrowingRepository) Update(borrowing model.Borrowing) error {
+func (s *BorrowingRepository) Update(borrowing *model.Borrowing) error {
 	var borrowingDB model.Borrowing
 
 	if err := db.GetDB().First(&borrowingDB, borrowing.ID).Error; err != nil {
