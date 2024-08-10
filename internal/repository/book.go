@@ -29,7 +29,13 @@ func (s *BookRepository) GetByID(id uint) (model.Book, error) {
 }
 
 func (s *BookRepository) Update(book model.Book) error {
-	return db.GetDB().Save(&book).Error
+	var bookDB model.Book
+
+	if err := db.GetDB().First(&bookDB, book.ID).Error; err != nil {
+		return err
+	}
+
+	return db.GetDB().Model(&bookDB).Updates(book).Error
 }
 
 func (s *BookRepository) List() ([]model.Book, error) {

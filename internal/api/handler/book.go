@@ -21,7 +21,7 @@ func NewBookHandler() *BookHandler {
 
 func (h *BookHandler) Create() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		data := types.CreateOrUpdateBookRequest{}
+		var data types.CreateBookRequest
 
 		if err := c.BodyParser(&data); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(nil)
@@ -30,7 +30,6 @@ func (h *BookHandler) Create() fiber.Handler {
 		book := model.Book{
 			Title:       data.Title,
 			Description: data.Description,
-			Status:      data.Status,
 			Author:      data.Author,
 		}
 
@@ -65,7 +64,7 @@ func (h *BookHandler) Update() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		bookId := c.Params("id")
 
-		var data types.CreateOrUpdateBookRequest
+		var data types.UpdateBookRequest
 
 		if err := c.BodyParser(&data); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

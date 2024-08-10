@@ -35,10 +35,6 @@ func Start(cfg *APIConfig) {
 	app.Use(helmet.New())
 	app.Use(recover.New())
 
-	app.Get("/api/list", func(c *fiber.Ctx) error {
-		return c.SendString("I'm a GET request!")
-	})
-
 	rb := routes.NewRoute()
 	rb.SetRoutesFiber(app)
 
