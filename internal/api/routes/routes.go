@@ -39,6 +39,6 @@ func (r *RouteConfig) SetRoutesFiber(app *fiber.App) {
 	app.Route("/borrowings", func(api fiber.Router) {
 		api.Use(middlewares.AuthJwtMw("admin"))
 		api.Get("/", handler.NewBorrowingHandler().List())
-		api.Put("/", handler.NewBorrowingHandler().Set())
+		api.Post("/", handler.NewBorrowingHandler().Create())
 	})
 }

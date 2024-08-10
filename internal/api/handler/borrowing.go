@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"time"
-
 	"github.com/evertonbzr/api-golang/internal/api/types"
 	"github.com/evertonbzr/api-golang/internal/model"
 	"github.com/evertonbzr/api-golang/internal/repository"
@@ -23,101 +21,70 @@ func NewBorrowingHandler() *BorrowingHandler {
 	}
 }
 
-func (h *BorrowingHandler) Set() fiber.Handler {
+func (h *BorrowingHandler) Create() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var data types.SetBorrowingRequest
+		var data types.CreateBorrowingRequest
 
 		if err := c.BodyParser(&data); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(nil)
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid request",
+			})
+		}
+
+		if data.BookID == 0 || data.UserID == 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Book and User ID are required",
+			})
 		}
 
 		var borrowing model.Borrowing
-		var action string
 
-		if data.UserID != 0 {
-			user, err := h.UserRepo.GetUserById(data.UserID)
-			if err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "User not found",
-				})
-			}
-
-			if user.Role != "user" {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "User is not allowed to borrow",
-				})
-			}
-
-			borrowing.UserID = user.ID
+		book, err := h.BookRepo.GetByID(data.BookID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Book not found",
+			})
+		}
+		if book.Status != "available" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Book is not available",
+			})
 		}
 
-		if data.BookID != 0 {
-			book, err := h.BookRepo.GetByID(data.BookID)
-			if err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "Book not found",
-				})
-			}
+		borrowing.BookID = book.ID
 
-			if book.Status == "borrowed" {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "Book is already borrowed",
-				})
-			}
-
-			borrowing.BookID = book.ID
+		user, err := h.UserRepo.GetUserById(data.UserID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "User not found",
+			})
 		}
 
-		if data.ID == 0 {
-			action = "create"
-			borrowing.Status = "borrowed"
-		} else {
-			action = "update"
-			borrowing.ID = data.ID
-			borrowing.Status = "returned"
-			borrowing.ReturnedAt = time.Now()
+		if user.Role != "user" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "User is not a user",
+			})
 		}
 
-		if action == "create" {
-			if err := h.BorrowingRepo.Create(
-				[]model.Borrowing{borrowing},
-			); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "Failed to create borrowing",
-				})
-			}
+		borrowing.UserID = data.UserID
 
-			if err := h.BookRepo.Update(
-				model.Book{
-					ID:     borrowing.BookID,
-					Status: "borrowed",
-				}); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "Failed to update book",
-				})
-			}
-		} else {
-			if err := h.BorrowingRepo.Update(
-				borrowing,
-			); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "Failed to update borrowing",
-				})
-			}
+		if err := h.BorrowingRepo.Create(&borrowing); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Failed to create borrowing",
+			})
+		}
 
-			if err := h.BookRepo.Update(
-				model.Book{
-					ID:     borrowing.BookID,
-					Status: "available",
-				}); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": "Failed to update book",
-				})
-			}
+		if err := h.BookRepo.Update(model.Book{
+			ID:     book.ID,
+			Status: "borrowed",
+		}); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Failed to update book",
+			})
 		}
 
 		return c.JSON(fiber.Map{
-			"message":   "Set borrowing successfully",
+			"message":   "Borrowing created successfully",
 			"borrowing": borrowing,
 		})
 	}

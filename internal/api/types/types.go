@@ -24,8 +24,7 @@ type UpdateBookRequest struct {
 	Author      string `json:"author"`
 }
 
-type SetBorrowingRequest struct {
-	ID     uint `json:"id"`
+type CreateBorrowingRequest struct {
 	UserID uint `json:"user_id"`
 	BookID uint `json:"book_id"`
 }

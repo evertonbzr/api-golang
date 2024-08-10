@@ -12,8 +12,8 @@ func NewBorrowingRepository() *BorrowingRepository {
 	return &BorrowingRepository{}
 }
 
-func (s *BorrowingRepository) Create(borrowing []model.Borrowing) error {
-	return db.GetDB().Create(&borrowing).Error
+func (s *BorrowingRepository) Create(borrowing *model.Borrowing) error {
+	return db.GetDB().Create(borrowing).Error
 }
 
 func (s *BorrowingRepository) GetByID(id uint) (model.Borrowing, error) {

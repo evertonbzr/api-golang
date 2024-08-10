@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -62,4 +63,18 @@ func CloseNatsConnection() {
 	if natsConnection != nil {
 		natsConnection.Close()
 	}
+}
+
+func PublishJetStreamMessage(ctx context.Context, subject string, data interface{}) error {
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	_, err = GetNatsJetStream().Publish(ctx, subject, dataBytes)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
